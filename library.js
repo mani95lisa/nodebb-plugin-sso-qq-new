@@ -27,15 +27,12 @@
 					callbackURL: nconf.get('url') + '/auth/qq/callback'
 				}, function (token, tokenSecret, profile, done) {
 					console.log(profile);
-					var email = '';
-					if (profile.emails && profile.emails.length) {
-						email = profile.emails[0].value
+
+					var picture = profile._json.figureurl_2;
+					if (!picture) {
+						picture = profile._json.figureurl;
 					}
-					var picture = profile.avatarUrl;
-					if (profile._json.avatar_large) {
-						picture = profile._json.avatar_large;
-					}
-					QQ.login(profile.id, profile.username, email, picture, function (err, user) {
+					QQ.login(profile.id, profile.nickname, '', picture, function (err, user) {
 						if (err) {
 							return done(err);
 						}
@@ -86,7 +83,9 @@
 
 				User.getUidByEmail(email, function(err, uid) {
 					if (!uid) {
-						User.create({username: username, email: email, picture:picture, uploadedpicture:picture}, function(err, uid) {
+						var user = {username: username, email: email, picture: picture, uploadedpicture: picture};
+						console.log(user);
+						User.create(user, function(err, uid) {
 							if (err !== null) {
 								callback(err);
 							} else {
